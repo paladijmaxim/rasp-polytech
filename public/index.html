@@ -2,7 +2,9 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c0f17" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#eef1f8" media="(prefers-color-scheme: light)">
 <script>try{var t=localStorage.getItem("theme")||"dark";document.documentElement.dataset.theme=t==="auto"?(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):t}catch(e){}</script>
 <title>Расписание Политеха</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +36,9 @@
   --ink:#f6e9e4;--muted:#b49a92;--violet:#ff8a5c;--amber:#ffd166;--lecture:#8fb4ff;--practice:#6fdc9d;--lab:#ffb35c;--exam:#ff7a9c;
   --on-accent:#2b1005;--bar:#5a3e38;--hover:rgba(255,180,140,.12);--track:rgba(255,180,140,.12);--glow:rgba(255,138,92,.35)
 }
-*{box-sizing:border-box}body{margin:0;line-height:1.45;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;line-height:1.45;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 button,input,select{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--violet);outline-offset:2px}
 
@@ -47,7 +51,6 @@ body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none
     radial-gradient(36% 36% at 20% 88%,color-mix(in srgb,var(--lecture) 20%,transparent),transparent 70%);
   filter:blur(60px);opacity:.55;animation:float 26s ease-in-out infinite alternate}
 @keyframes float{from{transform:translate3d(-2%,-1%,0) scale(1)}to{transform:translate3d(2%,2%,0) scale(1.08)}}
-@media(prefers-reduced-motion:reduce){body::before{animation:none}}
 
 /* ——— стеклянная карточка ——— */
 .panel{
@@ -60,10 +63,13 @@ body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none
 .panel h2{margin:0 0 14px;font-size:14px;font-weight:500;color:var(--muted);letter-spacing:.02em;text-transform:uppercase}
 
 /* ——— шапка ——— */
-.bar{position:sticky;top:0;z-index:20;padding:14px 20px;
+.bar{padding:14px 20px;padding-left:max(20px, env(safe-area-inset-left));padding-right:max(20px, env(safe-area-inset-right));
   background:color-mix(in srgb,var(--bg) 55%,transparent);
-  backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);
   border-bottom:1px solid var(--line)}
+@media(min-width:701px){
+  .bar{position:sticky;top:0;z-index:20;
+    backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%)}
+}
 #form{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:end;max-width:1200px;margin:0 auto}
 .field{display:grid;gap:6px;font-size:13px;color:var(--muted)}
 .field input,.field select{
@@ -78,21 +84,21 @@ body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none
   background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:36px}
 .check{display:flex;gap:9px;align-items:center;padding:11px 15px;border:1px solid var(--line);border-radius:14px;
   background:var(--glass);cursor:pointer;transition:border-color .2s,background .2s;color:var(--muted)}
-.check:hover{border-color:var(--line2)}
 .check input{accent-color:var(--violet);width:17px;height:17px}
 .btn{
   padding:11px 20px;border:1px solid var(--line);border-radius:14px;background:var(--glass);cursor:pointer;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  transition:transform .18s cubic-bezier(.2,.8,.3,1),box-shadow .25s,border-color .2s,filter .2s;will-change:transform}
-.btn:hover{border-color:var(--line2);transform:translateY(-1px);box-shadow:0 10px 24px -12px rgba(0,0,0,.6)}
-.btn:active{transform:translateY(0) scale(.98)}
+  transition:transform .18s cubic-bezier(.2,.8,.3,1),box-shadow .25s,border-color .2s,filter .2s;will-change:transform;
+  -webkit-tap-highlight-color:transparent}
 .btn.primary{
   background:linear-gradient(140deg,color-mix(in srgb,var(--violet) 92%,#fff 8%),var(--violet));
   border-color:transparent;color:var(--on-accent);font-weight:700;
   box-shadow:0 12px 30px -12px var(--glow),0 1px 0 0 rgba(255,255,255,.35) inset}
-.btn.primary:hover{box-shadow:0 16px 38px -14px var(--glow),0 1px 0 0 rgba(255,255,255,.45) inset;filter:brightness(1.05)}
 
-main{max-width:1200px;margin:0 auto;padding:22px 20px 60px}
+main{max-width:1200px;margin:0 auto;padding:22px 20px;
+  padding-left:max(20px, env(safe-area-inset-left));
+  padding-right:max(20px, env(safe-area-inset-right));
+  padding-bottom:max(60px, env(safe-area-inset-bottom))}
 #status{min-height:1.4em;color:var(--muted);margin:0 0 14px;padding-left:4px}
 #status.error{color:var(--exam)}
 
@@ -118,14 +124,14 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px 60px}
   color:var(--on-amber);font-weight:700;text-decoration:none;
   box-shadow:0 12px 28px -14px color-mix(in srgb,var(--amber) 60%,transparent);
   transition:transform .18s,filter .2s}
-.go:hover{filter:brightness(1.07);transform:translateY(-1px)}
 #quote{font:500 21px/1.4 Unbounded,sans-serif;margin:0}
 .qmeta{margin-top:18px;color:var(--muted);font-size:14px}
 
 /* ——— календарь ——— */
 .monthbar{display:flex;align-items:center;gap:10px;margin:10px 0 16px}
-.monthbar h1{font:500 22px Unbounded,sans-serif;margin:0 10px;flex:1;letter-spacing:-.01em}
-.monthbar .btn{min-width:46px;text-align:center}
+.monthbar h1{font:500 22px Unbounded,sans-serif;margin:0 10px;flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.01em}
+.monthbar .btn{min-width:46px;text-align:center;flex:none}
 .wdays,#cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
 .wdays{margin-bottom:8px;color:var(--muted);font-size:13px;text-align:center;text-transform:uppercase;letter-spacing:.04em}
 #cal{gap:8px}
@@ -133,8 +139,8 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px 60px}
   border:1px solid var(--line);border-radius:18px;background:var(--panel);cursor:pointer;
   backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
   box-shadow:0 10px 26px -20px rgba(0,0,0,.7);
-  transition:transform .18s cubic-bezier(.2,.8,.3,1),border-color .2s,box-shadow .25s,background .2s}
-.cell:hover{border-color:var(--line2);transform:translateY(-2px);box-shadow:0 18px 36px -22px rgba(0,0,0,.8)}
+  transition:transform .18s cubic-bezier(.2,.8,.3,1),border-color .2s,box-shadow .25s,background .2s;
+  -webkit-tap-highlight-color:transparent}
 .cell.out{opacity:.32}
 .cell.sel{border-color:color-mix(in srgb,var(--violet) 60%,transparent);background:var(--panel2);
   box-shadow:0 0 0 3px color-mix(in srgb,var(--violet) 18%,transparent),0 18px 36px -22px rgba(0,0,0,.8)}
@@ -142,7 +148,7 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px 60px}
   font-size:14px;font-weight:700;background:var(--glass);border:1px solid var(--line)}
 .cell.today .num{background:linear-gradient(140deg,var(--violet),color-mix(in srgb,var(--violet) 70%,#fff 30%));
   color:var(--on-accent);border-color:transparent;box-shadow:0 8px 20px -10px var(--glow)}
-.mini{display:block;font-size:12px;line-height:1.35;padding:3px 7px;border-radius:9px;border-left:none;
+.mini{display:block;font-size:12px;line-height:1.35;padding:3px 7px;border-radius:9px;
   background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--ink);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .more{font-size:12px;color:var(--muted);padding-left:4px}
@@ -159,8 +165,9 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px 60px}
   backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);
   box-shadow:0 12px 30px -22px rgba(0,0,0,.8),0 1px 0 0 var(--glass) inset;
   border-left:3px solid var(--c,var(--other));
-  transition:transform .18s,box-shadow .25s}
-.lesson:hover{transform:translateY(-2px);box-shadow:0 20px 40px -24px rgba(0,0,0,.85),0 1px 0 0 var(--glass) inset}
+  transition:transform .18s,box-shadow .25s;
+  animation:rise .35s cubic-bezier(.2,.8,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .lesson.past{opacity:.45}
 .lesson.now{background:var(--panel2);box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 30%,transparent),0 20px 40px -24px rgba(0,0,0,.85)}
 .lesson time{display:block;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -169,7 +176,6 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px 60px}
 .lesson p{margin:3px 0 0;font-size:13px;color:var(--muted);overflow-wrap:anywhere}
 .lesson a{display:inline-block;margin:10px 6px 0 0;padding:7px 14px;border:1px solid var(--c);border-radius:12px;color:var(--c);
   font-size:13px;text-decoration:none;transition:background .2s,color .2s,transform .18s}
-.lesson a:hover{background:color-mix(in srgb,var(--c) 88%,#fff 12%);color:var(--bg);transform:translateY(-1px)}
 .lecture{--c:var(--lecture)}.practice{--c:var(--practice)}.lab{--c:var(--lab)}.exam{--c:var(--exam)}.other{--c:var(--other)}
 
 /* ——— статистика ——— */
@@ -193,24 +199,76 @@ main{max-width:1200px;margin:0 auto;padding:22px 20px 60px}
   box-shadow:0 0 16px -2px var(--glow);transition:width .6s cubic-bezier(.2,.8,.3,1)}
 .sync{margin-bottom:18px}
 .syncrow{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-.syncrow .check{padding:11px 15px}
 a.btn{display:inline-block;text-decoration:none}
 #syncHint{margin:14px 0 0;font-size:13px;color:var(--muted)}
 
-@media(max-width:900px){#hero,#stats{grid-template-columns:1fr}.count{flex-direction:column;align-items:flex-start}}
+/* ——— hover только там, где есть мышь ——— */
+@media(hover:hover) and (pointer:fine){
+  .btn:hover{border-color:var(--line2);transform:translateY(-1px);box-shadow:0 10px 24px -12px rgba(0,0,0,.6)}
+  .btn.primary:hover{box-shadow:0 16px 38px -14px var(--glow),0 1px 0 0 rgba(255,255,255,.45) inset;filter:brightness(1.05)}
+  .cell:hover{border-color:var(--line2);transform:translateY(-2px);box-shadow:0 18px 36px -22px rgba(0,0,0,.8)}
+  .lesson:hover{transform:translateY(-2px);box-shadow:0 20px 40px -24px rgba(0,0,0,.85),0 1px 0 0 var(--glass) inset}
+  .go:hover{filter:brightness(1.07);transform:translateY(-1px)}
+  .lesson a:hover{background:color-mix(in srgb,var(--c) 88%,#fff 12%);color:var(--bg);transform:translateY(-1px)}
+  .check:hover{border-color:var(--line2)}
+}
+.btn:active{transform:translateY(0) scale(.98)}
+
+/* ——— планшет ——— */
+@media(max-width:900px){
+  #hero,#stats{grid-template-columns:1fr}
+  .count{flex-direction:column;align-items:flex-start}
+}
+
+/* ——— мобилка ——— */
 @media(max-width:700px){
+  .bar{position:static;padding:12px 14px;padding-left:max(14px, env(safe-area-inset-left));padding-right:max(14px, env(safe-area-inset-right));
+    backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}
+  #form{gap:10px}
+  .field{flex:1 1 160px}
+  .field input,.field select{width:100%;padding:10px 12px}
+  .check{padding:10px 13px}
+  main{padding:16px 14px;padding-left:max(14px, env(safe-area-inset-left));padding-right:max(14px, env(safe-area-inset-right));padding-bottom:max(40px, env(safe-area-inset-bottom))}
   .panel{border-radius:20px;padding:16px}
+  .count{gap:18px}
+  .ringbox{width:150px;height:150px}
+  #cnt{font-size:22px}
+  #cntLabel{font-size:12px}
+  #quote{font-size:17px}
+  .info h3{font-size:17px}
+  .monthbar{gap:6px;margin:8px 0 12px}
+  .monthbar h1{font-size:16px;margin:0 4px}
+  .monthbar .btn{min-width:40px;padding:9px 12px}
+  #detail h2{font-size:16px}
+  .big{font-size:28px}
   #cal{gap:6px}
   .cell{min-height:58px;padding:6px;align-items:center;border-radius:14px}
   .num{align-self:center;min-width:26px;height:26px}
   .mini,.more{display:none}
   .dots{display:flex}
-  .field input,.field select{width:100%}
-  .field{flex:1 1 160px}
+  .dl{grid-template-columns:1fr}
+  .donut{flex-direction:column;align-items:flex-start;gap:14px}
 }
+
+/* ——— очень узкие экраны ——— */
+@media(max-width:380px){
+  .panel{padding:14px;border-radius:18px}
+  #cal{gap:4px}
+  .cell{padding:4px;border-radius:12px;min-height:52px}
+  .num{min-width:22px;height:22px;font-size:12px}
+  .dots{gap:3px}
+  .dots i{width:5px;height:5px}
+  .monthbar h1{font-size:15px}
+  .monthbar .btn{min-width:36px;padding:8px 10px}
+  #cnt{font-size:20px}
+  .ringbox{width:132px;height:132px}
+}
+
 @media(prefers-reduced-motion:reduce){
+  body::before{animation:none}
   #ring{transition:none}
   .btn,.cell,.lesson,.go,.meter i,.mbars i{transition:none}
+  .lesson{animation:none}
 }
 </style>
 </head>
@@ -279,145 +337,4 @@ function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=nu
 function svg(t,a){const e=document.createElementNS('http://www.w3.org/2000/svg',t);for(const k in a)k==='stroke'?e.style.stroke=a[k]:e.setAttribute(k,a[k]);return e}
 function setStatus(m,err){const s=$('#status');s.textContent=m;s.classList.toggle('error',!!err)}
 const hm=s=>`${s[0]}:${pad(s[1])}–${s[2]}:${pad(s[3])}`;
-const linksOf=l=>l.links&&l.links.length?l.links:(l.link?[l.link]:[]);
-function hms(ms){const t=Math.max(0,Math.floor(ms/1000)),d=Math.floor(t/86400);
- return (d?`${d} д `:'')+`${pad(Math.floor(t%86400/3600))}:${pad(Math.floor(t%3600/60))}:${pad(t%60)}`}
-
-async function api(p){const r=await fetch(p);const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||`Ошибка ${r.status}`);return j}
-async function loadGroups(){try{const{groups}=await api('/api/groups');
- $('#groups').replaceChildren(...groups.map(g=>Object.assign(document.createElement('option'),{value:g})))}catch{}}
-async function load(group){
- setStatus('Загружаю расписание…');
- try{state.data=await api(`/api/schedule?group=${encodeURIComponent(group)}&session=${$('#session').checked?1:0}`);
-  try{localStorage.setItem('group',group)}catch{}
-  const t=iso(new Date()),r=state.data.range;
-  goMonth(r&&(t<r[0]||t>r[1])?new Date(r[0]+'T00:00:00'):new Date(),true);
-  state.occDay='';setStatus(state.data.lessons.length?'':'Для этой группы занятий не найдено.');
-  $('#hero').hidden=$('#stats').hidden=$('#sync').hidden=false;updateSync();tick();
- }catch(e){state.data=null;$('#cal').replaceChildren();$('#detail').replaceChildren();$('#hero').hidden=$('#stats').hidden=$('#sync').hidden=true;setStatus(e.message,true)}}
-
-function lessonsOn(date){const d=iso(date),w=(date.getDay()+6)%7+1;
- return state.data.lessons.filter(l=>l.day===w&&(!l.from||l.from<=d)&&(!l.to||d<=l.to)).sort((a,b)=>a.pair-b.pair)}
-function occurrences(){const out=[],base=at(new Date(),0,0);
- for(let i=0;i<60;i++){const d=addDays(base,i);
-  for(const l of lessonsOn(d)){const s=SLOTS[l.pair-1];if(s)out.push({l,start:at(d,s[0],s[1]),end:at(d,s[2],s[3])})}}
- return out}
-
-function setHero(live,o,now){
- $('#countPanel').classList.toggle('live',live);
- if(!o){$('#cnt').textContent='—';$('#cntLabel').textContent='пар впереди нет';$('#hTitle').textContent='Ближайших занятий не найдено';
-  $('#hWhen').textContent='';$('#hPlace').textContent='';$('#hLink').hidden=true;$('#ring').style.strokeDashoffset=C;return}
- const ms=(live?o.end:o.start)-now;
- $('#cnt').textContent=hms(ms);$('#cntLabel').textContent=live?'до конца пары':'до начала';
- const p=live?(now-o.start)/(o.end-o.start):1-Math.min(ms,3*3600e3)/(3*3600e3);
- $('#ring').style.strokeDashoffset=C*(1-Math.max(0,Math.min(1,p)));
- const l=o.l;
- $('#hTitle').textContent=l.title;
- $('#hWhen').textContent=`${live?'Идёт сейчас':fmtLong.format(o.start)}, ${l.pair} пара, ${hm(SLOTS[l.pair-1])}`;
- $('#hPlace').textContent=[...l.rooms,l.location,...l.teachers].filter(Boolean).join(', ');
- const a=$('#hLink'),ls=linksOf(l);a.hidden=!ls.length;if(ls.length)a.href=ls[0]}
-
-function tick(){
- if(!state.data)return;
- const now=new Date(),t=iso(now);
- if(state.occDay!==t){state.occ=occurrences();state.occDay=t}
- const cur=state.occ.find(o=>o.start<=now&&now<o.end),next=state.occ.find(o=>o.start>now);
- setHero(!!cur,cur||next,now);
- const today=state.occ.filter(o=>iso(o.start)===t),left=today.filter(o=>o.start>now).length+(cur?1:0);
- const key=cur?'live':next&&next.start-now<30*60e3&&iso(next.start)===t?'soon':!today.length?'free':!left?'done':'base';
- if(key!==state.qkey){state.qkey=key;const pool=QUOTES[key],doy=Math.floor((now-new Date(now.getFullYear(),0,0))/864e5);
-  $('#quote').textContent=pool[doy%pool.length]}
- $('#dayStat').textContent=today.length?`Сегодня пар: ${today.length}, осталось: ${left}`:'Сегодня занятий нет'}
-
-function lessonNode(l,date){
- const s=SLOTS[l.pair-1],n=el('article',`lesson ${l.kind}`),now=new Date();
- if(s){const st=at(date,s[0],s[1]),en=at(date,s[2],s[3]);if(en<now)n.classList.add('past');else if(st<=now)n.classList.add('now')}
- n.append(el('time',null,`${l.pair} пара, ${s?hm(s):''}`),el('h3',null,l.title));
- if(l.type)n.append(el('span','type',l.type));
- const place=[...l.rooms,l.location].filter(Boolean).join(', ');
- if(place)n.append(el('p',null,place));
- if(l.teachers.length)n.append(el('p',null,l.teachers.join(', ')));
- linksOf(l).forEach((u,i)=>{const a=el('a',null,i?`Ссылка ${i+1}`:'Открыть лекцию');a.href=u;a.target='_blank';a.rel='noopener noreferrer';n.append(a)});
- return n}
-
-function renderStats(per,y,mo,dim){
- const t=iso(new Date()),counts=[],by={};
- for(let d=1;d<=dim;d++){const list=per[iso(new Date(y,mo,d))]||[];counts.push(list.length);list.forEach(l=>by[l.kind]=(by[l.kind]||0)+1)}
- const max=Math.max(1,...counts),total=counts.reduce((a,b)=>a+b,0);
- const bars=el('div','panel');bars.append(el('h2',null,'Нагрузка по дням месяца'));
- const row=el('div','mbars');
- counts.forEach((c,i)=>{const b=el('i',iso(new Date(y,mo,i+1))===t?'t':'');b.style.height=`${c/max*100}%`;b.title=`${i+1}: пар ${c}`;row.append(b)});
- const ax=el('div','axis');ax.append(el('span',null,'1'),el('span',null,`всего пар: ${total}`),el('span',null,dim));
- bars.append(row,ax);
- const dn=el('div','panel');dn.append(el('h2',null,'Из чего состоит месяц'));
- const wrap=el('div','donut'),sv=svg('svg',{viewBox:'0 0 42 42','aria-hidden':'true'}),leg=el('ul','leg');
- sv.append(svg('circle',{cx:21,cy:21,r:15.915,stroke:'var(--track)'}));
- let acc=0;for(const k of Object.keys(KINDS)){if(!by[k])continue;const p=by[k]/total*100;
-  sv.append(svg('circle',{cx:21,cy:21,r:15.915,stroke:`var(--${k})`,'stroke-dasharray':`${p} ${100-p}`,'stroke-dashoffset':25-acc}));acc+=p;
-  const li=el('li',null,`${KINDS[k]}: ${by[k]}`),b=el('b');b.style.background=`var(--${k})`;li.prepend(b);leg.append(li)}
- if(!total)leg.append(el('li',null,'В этом месяце занятий нет'));
- wrap.append(sv,leg);dn.append(wrap);
- const sem=el('div','panel'),r=state.data.range;sem.append(el('h2',null,state.data.session?'Прогресс сессии':'Прогресс семестра'));
- if(r){const a=new Date(r[0]),b=new Date(r[1]),n=new Date(),pc=Math.max(0,Math.min(100,Math.round((n-a)/(b-a)*100))),dl=Math.max(0,Math.ceil((b-n)/864e5));
-  const m=el('div','meter'),f=el('i');f.style.width=`${pc}%`;m.append(f);
-  sem.append(el('div','big',`${pc}%`),m,el('p',null,dl?`До конца осталось ${dl} дн.`:'Период завершён'))}
- else sem.append(el('p',null,'Нет данных о датах'));
- $('#stats').replaceChildren(bars,dn,sem)}
-
-function renderDetail(per){
- const d=new Date(state.sel+'T00:00:00'),list=per[state.sel]||lessonsOn(d);
- const h=el('h2',null,cap(fmtLong.format(d)));h.append(el('small',null,list.length?`пар: ${list.length}`:'занятий нет'));
- const wrap=el('div','dl');list.forEach(l=>wrap.append(lessonNode(l,d)));
- if(!list.length)wrap.append(el('p','none','В этот день занятий нет — можно отдохнуть.'));
- $('#detail').replaceChildren(h,wrap)}
-
-function render(){
- if(!state.data)return;
- const m=state.month,y=m.getFullYear(),mo=m.getMonth(),dim=new Date(y,mo+1,0).getDate();
- $('#range').textContent=cap(new Intl.DateTimeFormat('ru',{month:'long',year:'numeric'}).format(m));
- const off=(m.getDay()+6)%7,rows=Math.ceil((off+dim)/7),first=addDays(m,-off),today=iso(new Date()),per={},cells=[];
- for(let i=0;i<rows*7;i++){
-  const d=addDays(first,i),k=iso(d),list=lessonsOn(d);per[k]=list;
-  const b=el('button','cell'+(d.getMonth()===mo?'':' out')+(k===today?' today':'')+(k===state.sel?' sel':''));
-  b.type='button';b.setAttribute('aria-pressed',String(k===state.sel));b.setAttribute('aria-label',`${fmtLong.format(d)}, пар: ${list.length}`);
-  b.append(el('span','num',d.getDate()));
-  list.slice(0,3).forEach(l=>{const s=SLOTS[l.pair-1];b.append(el('span',`mini ${l.kind}`,`${s?`${s[0]}:${pad(s[1])} `:''}${l.title}`))});
-  if(list.length>3)b.append(el('span','more',`ещё ${list.length-3}`));
-  if(list.length){const dots=el('span','dots');list.forEach(l=>dots.append(el('i',l.kind)));b.append(dots)}
-  b.onclick=()=>{state.sel=k;render()};cells.push(b)}
- $('#cal').replaceChildren(...cells);
- renderStats(per,y,mo,dim);renderDetail(per)}
-
-function goMonth(d,noRender){
- state.month=firstOfMonth(d);const t=new Date();
- state.sel=t.getFullYear()===d.getFullYear()&&t.getMonth()===d.getMonth()?iso(t):iso(state.month);
- if(!noRender||state.data)render()}
-$('#prev').onclick=()=>goMonth(new Date(state.month.getFullYear(),state.month.getMonth()-1,1));
-$('#next').onclick=()=>goMonth(new Date(state.month.getFullYear(),state.month.getMonth()+1,1));
-$('#today').onclick=()=>goMonth(new Date());
-$('#form').onsubmit=e=>{e.preventDefault();load($('#group').value.trim())};
-$('#session').onchange=()=>{const g=$('#group').value.trim();if(g)load(g)};
-function updateSync(){
- const d=state.data;if(!d)return;
- const q=new URLSearchParams({group:d.group,session:d.session?1:0});
- if($('#alarm').checked)q.set('alarm',15);
- const dl=new URLSearchParams(q);dl.set('download',1);
- $('#icsDl').href=`/api/calendar.ics?${dl}`;
- $('#icsSub').href=`webcal://${location.host}/api/calendar.ics?${q}`;
- $('#syncHint').textContent=['localhost','127.0.0.1'].includes(location.hostname)
-  ?'.ics добавляет текущее расписание один раз. Подписка обновляется сама, но Календарь должен достучаться до сервера: на этом Mac она работает сразу, а для iPhone откройте приложение по адресу компьютера в вашей сети (например, http://192.168.1.5:3000) и нажмите «Подписаться».'
-  :'Подписка обновляется сама каждые несколько часов, а .ics добавляет расписание один раз.'}
-$('#alarm').onchange=updateSync;
-const mq=matchMedia('(prefers-color-scheme: light)');
-let theme='dark';try{theme=localStorage.getItem('theme')||'dark'}catch{}
-const applyTheme=t=>{document.documentElement.dataset.theme=t==='auto'?(mq.matches?'light':'dark'):t};
-$('#theme').value=theme;
-$('#theme').onchange=e=>{theme=e.target.value;try{localStorage.setItem('theme',theme)}catch{}applyTheme(theme)};
-mq.addEventListener('change',()=>{if(theme==='auto')applyTheme('auto')});
-setInterval(tick,1000);setInterval(render,60000);
-loadGroups();
-let saved=null;try{saved=localStorage.getItem('group')}catch{}
-if(saved){$('#group').value=saved;load(saved)}
-</script>
-</body>
-</html>
+const linksOf=l=>l.links&&l.links.length?l.links:(l
