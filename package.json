@@ -1,0 +1,7 @@
+{
+  "name": "rasp-polytech",
+  "version": "1.0.0",
+  "description": "Расписание Московского Политеха с rasp.dmami.ru",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}

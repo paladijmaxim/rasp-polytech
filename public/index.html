@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("theme")||"dark";document.documentElement.dataset.theme=t==="auto"?(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):t}catch(e){}</script>
+<title>Расписание Политеха</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0f17;--panel:#141926;--panel2:#1b2234;--line:#252e44;--ink:#e7ebf4;--muted:#8b95ab;
+--violet:#8f7dff;--amber:#ffb84d;--lecture:#7ea6ff;--practice:#4fd1a5;--lab:#ff9a52;--exam:#ff6f9c;--other:#8b95ab;
+--on-accent:#120d33;--on-amber:#2a1a00;--bar:#313c5a;--hover:#3a4766;--track:#252e44;
+color-scheme:dark;font-family:Onest,system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+[data-theme=light]{--bg:#f3f5fa;--panel:#fff;--panel2:#eaeef7;--line:#d5dbe8;--ink:#161d2e;--muted:#5d6980;--violet:#5b45e6;--amber:#e08a00;--lecture:#2f6fed;--practice:#0d8a64;--lab:#c2570c;--exam:#d12a5c;--other:#6b7689;--on-accent:#fff;--bar:#c9d1e3;--hover:#b4bfd6;--track:#d5dbe8;color-scheme:light}
+[data-theme=ocean]{--bg:#06141a;--panel:#0d222b;--panel2:#13303c;--line:#1c3f4d;--ink:#e3f2f5;--muted:#86a7b0;--violet:#3dd6d0;--amber:#ffc95c;--lecture:#6fb7ff;--practice:#5fe3a1;--lab:#ffa45c;--exam:#ff7a9c;--on-accent:#04201f;--bar:#245565;--hover:#2f6c80;--track:#1c3f4d}
+[data-theme=sunset]{--bg:#17100f;--panel:#241817;--panel2:#2f201e;--line:#44302c;--ink:#f6e9e4;--muted:#b49a92;--violet:#ff8a5c;--amber:#ffd166;--lecture:#8fb4ff;--practice:#6fdc9d;--lab:#ffb35c;--exam:#ff7a9c;--on-accent:#2b1005;--bar:#5a3e38;--hover:#6b4a43;--track:#44302c}
+*{box-sizing:border-box}body{margin:0;line-height:1.4}button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+.bar{border-bottom:1px solid var(--line);padding:14px 20px}
+#form{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:end;max-width:1200px;margin:0 auto}
+.field{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.field input,.field select{width:180px;padding:9px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-size:16px}
+.check{display:flex;gap:8px;align-items:center;padding-bottom:9px;color:var(--muted)}
+.btn{padding:9px 16px;border:1px solid var(--line);border-radius:6px;background:var(--panel);cursor:pointer}
+.btn:hover{border-color:var(--violet)}.btn.primary{background:var(--violet);border-color:var(--violet);color:var(--on-accent);font-weight:700}
+main{max-width:1200px;margin:0 auto;padding:20px}
+#status{min-height:1.4em;color:var(--muted);margin:0 0 12px}#status.error{color:var(--exam)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px}
+.panel h2{margin:0 0 14px;font-size:15px;font-weight:500;color:var(--muted)}
+
+#hero{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px}
+.count{display:flex;gap:24px;align-items:center}
+.ringbox{position:relative;width:200px;height:200px;flex:none}
+.ringbox svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ringbox circle{fill:none;stroke-width:9}.track{stroke:var(--panel2)}
+#ring{stroke:var(--violet);stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .3s}
+.live #ring{stroke:var(--amber)}
+.ringtxt{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+#cnt{font:700 26px Unbounded,sans-serif;font-variant-numeric:tabular-nums}
+#cntLabel{font-size:13px;color:var(--muted);margin-top:4px}
+.info{min-width:0}.info h3{margin:0 0 6px;font:500 19px/1.25 Unbounded,sans-serif;overflow-wrap:anywhere}
+.info p{margin:2px 0;color:var(--muted)}.info .when{color:var(--ink)}
+.go{display:inline-block;margin-top:14px;padding:10px 18px;border-radius:6px;background:var(--amber);color:var(--on-amber);font-weight:700;text-decoration:none}
+.go:hover{filter:brightness(1.1)}
+#quote{font:500 21px/1.35 Unbounded,sans-serif;margin:0}.qmeta{margin-top:16px;color:var(--muted);font-size:14px}
+
+.monthbar{display:flex;align-items:center;gap:8px;margin:8px 0 14px}
+.monthbar h1{font:500 22px Unbounded,sans-serif;margin:0 8px;flex:1}.monthbar .btn{min-width:42px}
+.wdays,#cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.wdays{margin-bottom:6px;color:var(--muted);font-size:13px;text-align:center}
+#cal{gap:6px}
+.cell{display:flex;flex-direction:column;gap:3px;text-align:left;min-height:118px;padding:8px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer}
+.cell:hover{border-color:var(--hover)}.cell.out{opacity:.35}.cell.sel{border-color:var(--violet);background:var(--panel2)}
+.num{align-self:flex-start;min-width:26px;height:26px;padding:0 4px;display:grid;place-items:center;border-radius:13px;font-size:14px;font-weight:700}
+.cell.today .num{background:var(--violet);color:var(--on-accent)}
+.mini{display:block;font-size:12px;line-height:1.3;padding-left:6px;border-left:3px solid var(--c);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.more{font-size:12px;color:var(--muted)}
+.dots{display:none;gap:3px;flex-wrap:wrap;justify-content:center}.dots i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+
+#detail{margin:16px 0 24px}
+#detail h2{margin:0 0 12px;font:500 18px Unbounded,sans-serif;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+#detail h2 small{font:400 14px Onest,sans-serif;color:var(--muted)}
+.dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
+.none{color:var(--muted)}
+.lesson{padding:12px 14px;border:1px solid var(--line);border-left:4px solid var(--c,var(--other));border-radius:8px;background:var(--panel)}
+.lesson.past{opacity:.5}.lesson.now{background:var(--panel2)}
+.lesson time{display:block;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.lesson h3{margin:2px 0 4px;font-size:15px;overflow-wrap:anywhere}.lesson .type{font-size:13px;font-weight:500;color:var(--c)}
+.lesson p{margin:2px 0 0;font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.lesson a{display:inline-block;margin:8px 6px 0 0;padding:6px 12px;border:1px solid var(--c);border-radius:5px;color:var(--c);font-size:13px;text-decoration:none}
+.lesson a:hover{background:var(--c);color:var(--bg)}
+.lecture{--c:var(--lecture)}.practice{--c:var(--practice)}.lab{--c:var(--lab)}.exam{--c:var(--exam)}.other{--c:var(--other)}
+
+#stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.mbars{display:flex;gap:3px;align-items:flex-end;height:110px}
+.mbars i{flex:1;border-radius:3px 3px 0 0;background:var(--bar);min-height:3px}.mbars i.t{background:var(--violet)}
+.axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+.donut{display:flex;gap:18px;align-items:center}
+.donut svg{width:120px;height:120px;flex:none;transform:rotate(-90deg)}.donut circle{fill:none;stroke-width:6}
+.leg{list-style:none;margin:0;padding:0;font-size:14px;display:grid;gap:6px}.leg li{display:flex;gap:8px;align-items:center}.leg b{width:10px;height:10px;border-radius:50%}
+.big{font:700 34px Unbounded,sans-serif}.meter{height:10px;border-radius:5px;background:var(--panel2);margin:14px 0 10px;overflow:hidden}.meter i{display:block;height:100%;background:var(--violet)}
+.sync{margin-bottom:16px}.syncrow{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.syncrow .check{padding:0}
+a.btn{display:inline-block;text-decoration:none}#syncHint{margin:12px 0 0;font-size:13px;color:var(--muted)}
+@media(max-width:900px){#hero,#stats{grid-template-columns:1fr}.count{flex-direction:column;align-items:flex-start}}
+@media(max-width:700px){#cal{gap:4px}.cell{min-height:54px;padding:5px;align-items:center}.num{align-self:center}.mini,.more{display:none}.dots{display:flex}}
+@media(prefers-reduced-motion:reduce){#ring{transition:none}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <form id="form">
+    <label class="field"><span>Номер группы</span><input id="group" list="groups" placeholder="181-362" autocomplete="off" required></label>
+    <label class="check"><input type="checkbox" id="session"> Расписание сессии</label>
+    <label class="field"><span>Тема</span><select id="theme">
+      <option value="dark">Тёмная</option><option value="light">Светлая</option><option value="ocean">Океан</option><option value="sunset">Закат</option><option value="auto">Как в системе</option>
+    </select></label>
+    <button class="btn primary" type="submit">Показать расписание</button>
+  </form>
+  <datalist id="groups"></datalist>
+</header>
+<main>
+  <p id="status" role="status">Введите номер группы, чтобы увидеть расписание.</p>
+  <section id="hero" hidden>
+    <div class="panel count" id="countPanel">
+      <div class="ringbox">
+        <svg viewBox="0 0 200 200" aria-hidden="true"><circle class="track" cx="100" cy="100" r="90"/><circle id="ring" cx="100" cy="100" r="90" stroke-dasharray="565.5" stroke-dashoffset="565.5"/></svg>
+        <div class="ringtxt"><div id="cnt">00:00:00</div><div id="cntLabel"></div></div>
+      </div>
+      <div class="info"><h3 id="hTitle"></h3><p class="when" id="hWhen"></p><p id="hPlace"></p><a class="go" id="hLink" hidden target="_blank" rel="noopener noreferrer">Открыть лекцию</a></div>
+    </div>
+    <div class="panel"><p id="quote"></p><p class="qmeta" id="dayStat"></p></div>
+  </section>
+  <div class="monthbar">
+    <button class="btn" id="prev" aria-label="Предыдущий месяц">‹</button>
+    <h1 id="range">Месяц</h1>
+    <button class="btn" id="today">Сегодня</button>
+    <button class="btn" id="next" aria-label="Следующий месяц">›</button>
+  </div>
+  <div class="wdays" aria-hidden="true"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
+  <div id="cal"></div>
+  <section id="detail" aria-live="polite"></section>
+  <section class="panel sync" id="sync" hidden>
+    <h2>Apple Календарь</h2>
+    <div class="syncrow">
+      <a class="btn primary" id="icsDl" href="#" download="schedule.ics">Скачать .ics</a>
+      <a class="btn" id="icsSub" href="#">Подписаться (webcal)</a>
+      <label class="check"><input type="checkbox" id="alarm" checked> Напоминание за 15 минут</label>
+    </div>
+    <p id="syncHint"></p>
+  </section>
+  <section id="stats" hidden></section>
+</main>
+<script>
+const SLOTS=[[9,0,10,30],[10,40,12,10],[12,20,13,50],[14,30,16,0],[16,10,17,40],[17,50,19,20],[19,30,21,0]];
+const KINDS={lecture:'Лекции',practice:'Практики',lab:'Лабораторные',exam:'Зачёты и экзамены',other:'Другое'};
+const QUOTES={
+ live:['Ты уже на паре — слушай сейчас, разберёшься потом.','Час внимания сейчас экономит три часа зубрёжки перед зачётом.'],
+ soon:['Скоро начало. Тетрадь, вода, глубокий вдох.','Зайди заранее: лучшее место ещё не занято.'],
+ free:['Свободный день — вложи его в то, что давно откладывал.','Сегодня без пар: один час на проект стоит десяти планов.'],
+ done:['День закрыт. Повтори одну тему — завтра скажешь себе спасибо.','Пары закончились. Двадцать минут практики закрепят всё лучше, чем вечер ленты.'],
+ base:['Маленький шаг каждый день — и семестр сдаётся сам.','Не нужно быть лучшим. Нужно прийти и сделать сегодняшнее.','Сложная тема — это просто тема, которую ты ещё не разобрал.']};
+const $=s=>document.querySelector(s),C=565.5,pad=n=>String(n).padStart(2,'0');
+const fmtLong=new Intl.DateTimeFormat('ru',{weekday:'long',day:'numeric',month:'long'});
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+const state={data:null,month:firstOfMonth(new Date()),sel:iso(new Date()),occ:[],occDay:'',qkey:''};
+function iso(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function firstOfMonth(d){return new Date(d.getFullYear(),d.getMonth(),1)}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+function at(d,h,m){const x=new Date(d);x.setHours(h,m,0,0);return x}
+function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function svg(t,a){const e=document.createElementNS('http://www.w3.org/2000/svg',t);for(const k in a)k==='stroke'?e.style.stroke=a[k]:e.setAttribute(k,a[k]);return e}
+function setStatus(m,err){const s=$('#status');s.textContent=m;s.classList.toggle('error',!!err)}
+const hm=s=>`${s[0]}:${pad(s[1])}–${s[2]}:${pad(s[3])}`;
+const linksOf=l=>l.links&&l.links.length?l.links:(l.link?[l.link]:[]);
+function hms(ms){const t=Math.max(0,Math.floor(ms/1000)),d=Math.floor(t/86400);
+ return (d?`${d} д `:'')+`${pad(Math.floor(t%86400/3600))}:${pad(Math.floor(t%3600/60))}:${pad(t%60)}`}
+
+async function api(p){const r=await fetch(p);const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||`Ошибка ${r.status}`);return j}
+async function loadGroups(){try{const{groups}=await api('/api/groups');
+ $('#groups').replaceChildren(...groups.map(g=>Object.assign(document.createElement('option'),{value:g})))}catch{}}
+async function load(group){
+ setStatus('Загружаю расписание…');
+ try{state.data=await api(`/api/schedule?group=${encodeURIComponent(group)}&session=${$('#session').checked?1:0}`);
+  try{localStorage.setItem('group',group)}catch{}
+  const t=iso(new Date()),r=state.data.range;
+  goMonth(r&&(t<r[0]||t>r[1])?new Date(r[0]+'T00:00:00'):new Date(),true);
+  state.occDay='';setStatus(state.data.lessons.length?'':'Для этой группы занятий не найдено.');
+  $('#hero').hidden=$('#stats').hidden=$('#sync').hidden=false;updateSync();tick();
+ }catch(e){state.data=null;$('#cal').replaceChildren();$('#detail').replaceChildren();$('#hero').hidden=$('#stats').hidden=$('#sync').hidden=true;setStatus(e.message,true)}}
+
+function lessonsOn(date){const d=iso(date),w=(date.getDay()+6)%7+1;
+ return state.data.lessons.filter(l=>l.day===w&&(!l.from||l.from<=d)&&(!l.to||d<=l.to)).sort((a,b)=>a.pair-b.pair)}
+function occurrences(){const out=[],base=at(new Date(),0,0);
+ for(let i=0;i<60;i++){const d=addDays(base,i);
+  for(const l of lessonsOn(d)){const s=SLOTS[l.pair-1];if(s)out.push({l,start:at(d,s[0],s[1]),end:at(d,s[2],s[3])})}}
+ return out}
+
+function setHero(live,o,now){
+ $('#countPanel').classList.toggle('live',live);
+ if(!o){$('#cnt').textContent='—';$('#cntLabel').textContent='пар впереди нет';$('#hTitle').textContent='Ближайших занятий не найдено';
+  $('#hWhen').textContent='';$('#hPlace').textContent='';$('#hLink').hidden=true;$('#ring').style.strokeDashoffset=C;return}
+ const ms=(live?o.end:o.start)-now;
+ $('#cnt').textContent=hms(ms);$('#cntLabel').textContent=live?'до конца пары':'до начала';
+ const p=live?(now-o.start)/(o.end-o.start):1-Math.min(ms,3*3600e3)/(3*3600e3);
+ $('#ring').style.strokeDashoffset=C*(1-Math.max(0,Math.min(1,p)));
+ const l=o.l;
+ $('#hTitle').textContent=l.title;
+ $('#hWhen').textContent=`${live?'Идёт сейчас':fmtLong.format(o.start)}, ${l.pair} пара, ${hm(SLOTS[l.pair-1])}`;
+ $('#hPlace').textContent=[...l.rooms,l.location,...l.teachers].filter(Boolean).join(', ');
+ const a=$('#hLink'),ls=linksOf(l);a.hidden=!ls.length;if(ls.length)a.href=ls[0]}
+
+function tick(){
+ if(!state.data)return;
+ const now=new Date(),t=iso(now);
+ if(state.occDay!==t){state.occ=occurrences();state.occDay=t}
+ const cur=state.occ.find(o=>o.start<=now&&now<o.end),next=state.occ.find(o=>o.start>now);
+ setHero(!!cur,cur||next,now);
+ const today=state.occ.filter(o=>iso(o.start)===t),left=today.filter(o=>o.start>now).length+(cur?1:0);
+ const key=cur?'live':next&&next.start-now<30*60e3&&iso(next.start)===t?'soon':!today.length?'free':!left?'done':'base';
+ if(key!==state.qkey){state.qkey=key;const pool=QUOTES[key],doy=Math.floor((now-new Date(now.getFullYear(),0,0))/864e5);
+  $('#quote').textContent=pool[doy%pool.length]}
+ $('#dayStat').textContent=today.length?`Сегодня пар: ${today.length}, осталось: ${left}`:'Сегодня занятий нет'}
+
+function lessonNode(l,date){
+ const s=SLOTS[l.pair-1],n=el('article',`lesson ${l.kind}`),now=new Date();
+ if(s){const st=at(date,s[0],s[1]),en=at(date,s[2],s[3]);if(en<now)n.classList.add('past');else if(st<=now)n.classList.add('now')}
+ n.append(el('time',null,`${l.pair} пара, ${s?hm(s):''}`),el('h3',null,l.title));
+ if(l.type)n.append(el('span','type',l.type));
+ const place=[...l.rooms,l.location].filter(Boolean).join(', ');
+ if(place)n.append(el('p',null,place));
+ if(l.teachers.length)n.append(el('p',null,l.teachers.join(', ')));
+ linksOf(l).forEach((u,i)=>{const a=el('a',null,i?`Ссылка ${i+1}`:'Открыть лекцию');a.href=u;a.target='_blank';a.rel='noopener noreferrer';n.append(a)});
+ return n}
+
+function renderStats(per,y,mo,dim){
+ const t=iso(new Date()),counts=[],by={};
+ for(let d=1;d<=dim;d++){const list=per[iso(new Date(y,mo,d))]||[];counts.push(list.length);list.forEach(l=>by[l.kind]=(by[l.kind]||0)+1)}
+ const max=Math.max(1,...counts),total=counts.reduce((a,b)=>a+b,0);
+ const bars=el('div','panel');bars.append(el('h2',null,'Нагрузка по дням месяца'));
+ const row=el('div','mbars');
+ counts.forEach((c,i)=>{const b=el('i',iso(new Date(y,mo,i+1))===t?'t':'');b.style.height=`${c/max*100}%`;b.title=`${i+1}: пар ${c}`;row.append(b)});
+ const ax=el('div','axis');ax.append(el('span',null,'1'),el('span',null,`всего пар: ${total}`),el('span',null,dim));
+ bars.append(row,ax);
+ const dn=el('div','panel');dn.append(el('h2',null,'Из чего состоит месяц'));
+ const wrap=el('div','donut'),sv=svg('svg',{viewBox:'0 0 42 42','aria-hidden':'true'}),leg=el('ul','leg');
+ sv.append(svg('circle',{cx:21,cy:21,r:15.915,stroke:'var(--track)'}));
+ let acc=0;for(const k of Object.keys(KINDS)){if(!by[k])continue;const p=by[k]/total*100;
+  sv.append(svg('circle',{cx:21,cy:21,r:15.915,stroke:`var(--${k})`,'stroke-dasharray':`${p} ${100-p}`,'stroke-dashoffset':25-acc}));acc+=p;
+  const li=el('li',null,`${KINDS[k]}: ${by[k]}`),b=el('b');b.style.background=`var(--${k})`;li.prepend(b);leg.append(li)}
+ if(!total)leg.append(el('li',null,'В этом месяце занятий нет'));
+ wrap.append(sv,leg);dn.append(wrap);
+ const sem=el('div','panel'),r=state.data.range;sem.append(el('h2',null,state.data.session?'Прогресс сессии':'Прогресс семестра'));
+ if(r){const a=new Date(r[0]),b=new Date(r[1]),n=new Date(),pc=Math.max(0,Math.min(100,Math.round((n-a)/(b-a)*100))),dl=Math.max(0,Math.ceil((b-n)/864e5));
+  const m=el('div','meter'),f=el('i');f.style.width=`${pc}%`;m.append(f);
+  sem.append(el('div','big',`${pc}%`),m,el('p',null,dl?`До конца осталось ${dl} дн.`:'Период завершён'))}
+ else sem.append(el('p',null,'Нет данных о датах'));
+ $('#stats').replaceChildren(bars,dn,sem)}
+
+function renderDetail(per){
+ const d=new Date(state.sel+'T00:00:00'),list=per[state.sel]||lessonsOn(d);
+ const h=el('h2',null,cap(fmtLong.format(d)));h.append(el('small',null,list.length?`пар: ${list.length}`:'занятий нет'));
+ const wrap=el('div','dl');list.forEach(l=>wrap.append(lessonNode(l,d)));
+ if(!list.length)wrap.append(el('p','none','В этот день занятий нет — можно отдохнуть.'));
+ $('#detail').replaceChildren(h,wrap)}
+
+function render(){
+ if(!state.data)return;
+ const m=state.month,y=m.getFullYear(),mo=m.getMonth(),dim=new Date(y,mo+1,0).getDate();
+ $('#range').textContent=cap(new Intl.DateTimeFormat('ru',{month:'long',year:'numeric'}).format(m));
+ const off=(m.getDay()+6)%7,rows=Math.ceil((off+dim)/7),first=addDays(m,-off),today=iso(new Date()),per={},cells=[];
+ for(let i=0;i<rows*7;i++){
+  const d=addDays(first,i),k=iso(d),list=lessonsOn(d);per[k]=list;
+  const b=el('button','cell'+(d.getMonth()===mo?'':' out')+(k===today?' today':'')+(k===state.sel?' sel':''));
+  b.type='button';b.setAttribute('aria-pressed',String(k===state.sel));b.setAttribute('aria-label',`${fmtLong.format(d)}, пар: ${list.length}`);
+  b.append(el('span','num',d.getDate()));
+  list.slice(0,3).forEach(l=>{const s=SLOTS[l.pair-1];b.append(el('span',`mini ${l.kind}`,`${s?`${s[0]}:${pad(s[1])} `:''}${l.title}`))});
+  if(list.length>3)b.append(el('span','more',`ещё ${list.length-3}`));
+  if(list.length){const dots=el('span','dots');list.forEach(l=>dots.append(el('i',l.kind)));b.append(dots)}
+  b.onclick=()=>{state.sel=k;render()};cells.push(b)}
+ $('#cal').replaceChildren(...cells);
+ renderStats(per,y,mo,dim);renderDetail(per)}
+
+function goMonth(d,noRender){
+ state.month=firstOfMonth(d);const t=new Date();
+ state.sel=t.getFullYear()===d.getFullYear()&&t.getMonth()===d.getMonth()?iso(t):iso(state.month);
+ if(!noRender||state.data)render()}
+$('#prev').onclick=()=>goMonth(new Date(state.month.getFullYear(),state.month.getMonth()-1,1));
+$('#next').onclick=()=>goMonth(new Date(state.month.getFullYear(),state.month.getMonth()+1,1));
+$('#today').onclick=()=>goMonth(new Date());
+$('#form').onsubmit=e=>{e.preventDefault();load($('#group').value.trim())};
+$('#session').onchange=()=>{const g=$('#group').value.trim();if(g)load(g)};
+function updateSync(){
+ const d=state.data;if(!d)return;
+ const q=new URLSearchParams({group:d.group,session:d.session?1:0});
+ if($('#alarm').checked)q.set('alarm',15);
+ const dl=new URLSearchParams(q);dl.set('download',1);
+ $('#icsDl').href=`/api/calendar.ics?${dl}`;
+ $('#icsSub').href=`webcal://${location.host}/api/calendar.ics?${q}`;
+ $('#syncHint').textContent=['localhost','127.0.0.1'].includes(location.hostname)
+  ?'.ics добавляет текущее расписание один раз. Подписка обновляется сама, но Календарь должен достучаться до сервера: на этом Mac она работает сразу, а для iPhone откройте приложение по адресу компьютера в вашей сети (например, http://192.168.1.5:3000) и нажмите «Подписаться».'
+  :'Подписка обновляется сама каждые несколько часов, а .ics добавляет расписание один раз.'}
+$('#alarm').onchange=updateSync;
+const mq=matchMedia('(prefers-color-scheme: light)');
+let theme='dark';try{theme=localStorage.getItem('theme')||'dark'}catch{}
+const applyTheme=t=>{document.documentElement.dataset.theme=t==='auto'?(mq.matches?'light':'dark'):t};
+$('#theme').value=theme;
+$('#theme').onchange=e=>{theme=e.target.value;try{localStorage.setItem('theme',theme)}catch{}applyTheme(theme)};
+mq.addEventListener('change',()=>{if(theme==='auto')applyTheme('auto')});
+setInterval(tick,1000);setInterval(render,60000);
+loadGroups();
+let saved=null;try{saved=localStorage.getItem('group')}catch{}
+if(saved){$('#group').value=saved;load(saved)}
+</script>
+</body>
+</html>
