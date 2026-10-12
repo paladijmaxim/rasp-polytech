@@ -7,9 +7,9 @@ const crypto = require('node:crypto');
 
 const PORT = process.env.PORT || 3000;
 const BASE = process.env.RASP_BASE || 'https://rasp.dmami.ru';
-// Пути вынесены в переменные: если сайт поменяет API, правится одна строка.
 const GROUPS_PATH = process.env.RASP_GROUPS_PATH || '/semester.json';
 const GROUP_PATH = process.env.RASP_GROUP_PATH || '/site/group';
+const TEACHER_PATH = process.env.RASP_TEACHER_PATH || '/site/group'; // если у сайта другой эндпоинт для преподавателей — поправьте здесь
 const TTL = 15 * 60 * 1000;
 
 const HEADERS = {
@@ -40,11 +40,10 @@ const stripTags = (s) =>
 
 function toISO(d) {
   if (!d) return null;
-  const m = String(d).match(/^(\d{2})\.(\d{2})\.(\d{4})$/); // 24.04.2023
-  return m ? `${m[3]}-${m[2]}-${m[1]}` : String(d).slice(0, 10); // 2023-04-24
+  const m = String(d).match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  return m ? `${m[3]}-${m[2]}-${m[1]}` : String(d).slice(0, 10);
 }
 
-// Сетка бывает объектом {"1": ...} или массивом; нумерация с 1.
 const slots = (x) =>
   !x ? [] : Array.isArray(x)
     ? x.map((v, i) => [i + 1, v])
@@ -59,7 +58,6 @@ function kindOf(type) {
   return 'other';
 }
 
-// Ссылки на занятия: поле e_link, <a href> внутри аудиторий или адрес прямо в тексте.
 function extractLinks(l) {
   const direct = [l.e_link, l.link, l.url].filter(Boolean).map(String);
   const texts = [...direct, l.location, l.sbj, l.teacher,
@@ -72,7 +70,7 @@ function extractLinks(l) {
   }
   for (const d of direct) {
     const t = d.trim().replace(/&amp;/g, '&');
-    if (!/[\s<]/.test(t) && /^(\/\/)?[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(t)) found.push(t); // адрес без https://
+    if (!/[\s<]/.test(t) && /^(\/\/)?[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(t)) found.push(t);
   }
   const out = [];
   for (let u of found) {
@@ -126,23 +124,40 @@ async function getGroups() {
   });
 }
 
-async function getSchedule(group, session) {
-  return cached(`sched:${group}:${session}`, async () => {
-    const url = `${BASE}${GROUP_PATH}?group=${encodeURIComponent(group)}&session=${session ? 1 : 0}`;
-    const raw = await getJSON(url);
-    if (raw.status && raw.status !== 'ok') throw new Error('Группа не найдена');
-    const { lessons, range } = normalize(raw);
-    return { group, session: !!session, range, lessons };
+async function getTeachers() {
+  return cached('teachers', async () => {
+    // rasp.dmami.ru не имеет публичного списка преподавателей,
+    // возвращаем пустой массив — фронт вводит ФИО вручную.
+    return [];
   });
 }
 
-// ---------- календарь (.ics для Apple Календаря) ----------
+async function getSchedule({ group, teacher, session }) {
+  const key = teacher ? `teach:${teacher}:${session}` : `sched:${group}:${session}`;
+  return cached(key, async () => {
+    const q = teacher
+      ? `teacher=${encodeURIComponent(teacher)}&session=${session ? 1 : 0}`
+      : `group=${encodeURIComponent(group)}&session=${session ? 1 : 0}`;
+    const url = `${BASE}${teacher ? TEACHER_PATH : GROUP_PATH}?${q}`;
+    const raw = await getJSON(url);
+    if (raw.status && raw.status !== 'ok') throw new Error('Не найдено');
+    const { lessons, range } = normalize(raw);
+    return {
+      group: group || '',
+      teacher: teacher || '',
+      session: !!session,
+      range,
+      lessons,
+    };
+  });
+}
+
+// ---------- календарь (.ics) ----------
 const SLOTS = [[9, 0, 10, 30], [10, 40, 12, 10], [12, 20, 13, 50], [14, 30, 16, 0], [16, 10, 17, 40], [17, 50, 19, 20], [19, 30, 21, 0]];
-const MSK = 3; // Москва: UTC+3, без перехода на летнее время
+const MSK = 3;
 const esc = (s) => String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
 const stamp = (d) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 
-// RFC 5545: строки не длиннее 75 байт, продолжение начинается с пробела.
 function fold(line) {
   const out = [];
   let cur = '', bytes = 0;
@@ -156,9 +171,10 @@ function fold(line) {
 }
 
 function buildICS(data, alarm) {
+  const title = data.teacher ? 'Преподаватель ' + data.teacher : 'Политех ' + data.group;
   const lines = [
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//rasp-polytech//RU', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
-    `X-WR-CALNAME:${esc('Политех ' + data.group)}`, 'X-WR-TIMEZONE:Europe/Moscow',
+    `X-WR-CALNAME:${esc(title)}`, 'X-WR-TIMEZONE:Europe/Moscow',
     'REFRESH-INTERVAL;VALUE=DURATION:PT6H', 'X-PUBLISHED-TTL:PT6H',
   ];
   const now = stamp(new Date());
@@ -167,7 +183,7 @@ function buildICS(data, alarm) {
     const from = l.from || data.range?.[0], to = l.to || data.range?.[1];
     if (!slot || !from || !to) continue;
     const id = crypto.createHash('md5')
-      .update([data.group, l.title, l.type, l.pair, l.day, from, to, l.rooms.join()].join('|')).digest('hex').slice(0, 12);
+      .update([data.group, data.teacher, l.title, l.type, l.pair, l.day, from, to, l.rooms.join()].join('|')).digest('hex').slice(0, 12);
     const last = new Date(to + 'T00:00:00Z');
     let n = 0;
     for (const d = new Date(from + 'T00:00:00Z'); d <= last && n < 400; d.setUTCDate(d.getUTCDate() + 1), n++) {
@@ -201,15 +217,22 @@ http.createServer(async (req, res) => {
     if (url.pathname === '/api/groups') {
       return send(res, 200, { groups: await getGroups() });
     }
+    if (url.pathname === '/api/teachers') {
+      return send(res, 200, { teachers: await getTeachers() });
+    }
     if (url.pathname === '/api/schedule') {
       const group = (url.searchParams.get('group') || '').trim();
-      if (!group) return send(res, 400, { error: 'Укажите номер группы' });
-      return send(res, 200, await getSchedule(group, url.searchParams.get('session') === '1'));
+      const teacher = (url.searchParams.get('teacher') || '').trim();
+      if (!group && !teacher) return send(res, 400, { error: 'Укажите группу или преподавателя' });
+      return send(res, 200, await getSchedule({
+        group, teacher, session: url.searchParams.get('session') === '1',
+      }));
     }
     if (url.pathname === '/api/calendar.ics') {
       const group = (url.searchParams.get('group') || '').trim();
-      if (!group) return send(res, 400, { error: 'Укажите номер группы' });
-      const data = await getSchedule(group, url.searchParams.get('session') === '1');
+      const teacher = (url.searchParams.get('teacher') || '').trim();
+      if (!group && !teacher) return send(res, 400, { error: 'Укажите группу или преподавателя' });
+      const data = await getSchedule({ group, teacher, session: url.searchParams.get('session') === '1' });
       const alarm = Math.min(120, Math.max(0, parseInt(url.searchParams.get('alarm') || '0', 10) || 0));
       const headers = { 'Content-Type': 'text/calendar; charset=utf-8' };
       if (url.searchParams.get('download') === '1') headers['Content-Disposition'] = 'attachment; filename="schedule.ics"';
